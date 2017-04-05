@@ -6,7 +6,35 @@
 
     <groupId>com.keke</groupId>
     <artifactId>superman</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
-
-
+    <modules>
+        <module>superman-common</module>
+        <module>superman-parent</module>
+    </modules>
+    <!-- 负责管理构件的发布,指定Maven分发构件的位置
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Nexus Release Repository</name>
+            <url>http://116.228.114.190:8089/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>Nexus Snapshot Repository</name>
+            <url>http://116.228.114.190:8089/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+    -->
+    <!--远程仓库的配置
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>YMDD-Repositories</id>
+            <url>http://116.228.114.190:8089/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
+    -->
 </project>
