@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+       ">
+<!--
+    <bean class="com.gfa4j.utils.ContextHolder" lazy-init="false"/>
+-->
+    <context:property-placeholder location="classpath:properties/*.properties"
+                                  ignore-resource-not-found="false"/>
+    <!-- 扫描除Controller注解之外的类，Component、Respository、Service -->
+    <context:component-scan base-package="com.keke.superman">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <!-- 数据源驱动类可不写，Druid默认会自动根据URL识别DriverClass -->
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+
+        <!-- 基本属性 url、user、password -->
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="${jdbc.initialSize}"/>
+        <property name="minIdle" value="${jdbc.minIdle}"/>
+        <property name="maxActive" value="${jdbc.maxActive}"/>
+
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="60000"/>
+
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+
+        <!-- 配置监控统计拦截的filters -->
+        <property name="filters" value="stat"/>
+    </bean>
+
+    <!-- mybatis文件配置，扫描所有mapper文件 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" p:dataSource-ref="dataSource"
+          p:configLocation="classpath:config/mybatis-config.xml"
+          p:mapperLocations="classpath*:com/keke/superman/*/entity/**/*.xml"/>
+    <!--spring模板-->
+    <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate"><!--TODO原理研究http://www.cnblogs.com/daxin/p/3544188.html-->
+        <constructor-arg ref="sqlSessionFactory"/>
+    </bean>
+    <!-- spring与mybatis整合配置，扫描所有dao -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" p:basePackage="com.keke.superman.base.entity"
+          p:sqlSessionFactoryBeanName="sqlSessionFactory"/><!--TODO原理研究http://www.tuicool.com/articles/BbAz6v/-->
+
+    <util:properties id="securityProps">
+        <prop key="login.page">localhost</prop>
+        <prop key="index.page">localhost</prop>
+        <prop key="isRedirectLastRequestPage">true</prop>
+    </util:properties>
+
+    <context:annotation-config/>
+
+    <aop:config>
+        <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.keke.superman.*..service.*service.*(..))" order="100"/>
+    </aop:config>
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="add*" propagation="REQUIRED" isolation="READ_COMMITTED" rollback-for="Throwable"/>
+            <tx:method name="insert*" propagation="REQUIRED" isolation="READ_COMMITTED" rollback-for="Throwable"/>
+            <tx:method name="del*" propagation="REQUIRED" isolation="READ_COMMITTED" rollback-for="Throwable"/>
+            <tx:method name="delete*" propagation="REQUIRED" isolation="READ_COMMITTED" rollback-for="Throwable"/>
+            <tx:method name="remove*" propagation="REQUIRED" isolation="READ_COMMITTED" rollback-for="Throwable"/>
+            <tx:method name="update*" propagation="REQUIRED" isolation="READ_COMMITTED" rollback-for="Throwable"/>
+            <tx:method name="save*" propagation="REQUIRED" isolation="READ_COMMITTED" rollback-for="Throwable"/>
+            <tx:method name="*" propagation="SUPPORTS" read-only="true" rollback-for="Throwable"/>
+        </tx:attributes>
+    </tx:advice>
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+</beans>
