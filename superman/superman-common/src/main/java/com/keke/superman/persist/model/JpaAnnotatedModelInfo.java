@@ -32,16 +32,16 @@ import org.slf4j.LoggerFactory;
 
 public final class JpaAnnotatedModelInfo {
     public static final Logger logger = LoggerFactory.getLogger(JpaAnnotatedModelInfo.class);
-    private String a;
-    private String b;
-    private Iterable<String> c;
-    private Iterable<String> d;
-    private Iterable<String> e;
-    private Iterable<String> f;
-    private String g;
-    private String h;
-    private Pair<String, String> i;
-    private Pair<String, String> j;
+    private String pkColumnName;
+    private String pkFieldName;
+    private Iterable<String> allColumnNames;
+    private Iterable<String> allFieldNames;
+    private Iterable<String> allColumnNamesWithoutPk;
+    private Iterable<String> allFieldNamesWithoutPk;
+    private String tableName;
+    private String entityName;
+    private Pair<String, String> tableEntityPair;//{qc_arb_complaints,ArbComplaints}元祖对象
+    private Pair<String, String> j;//{complaints_id,complaintId}元祖对象//{record_version,recordVersion}元祖对象
     private Iterable<Pair<String, String>> k;
     private Iterable<Pair<String, String>> l;
     private ImmutableBiMap<String, String> m;
@@ -70,9 +70,9 @@ public final class JpaAnnotatedModelInfo {
 
     private JpaAnnotatedModelInfo(Class<?> modelClazz) {
         this.modelClazz = modelClazz;
-        this.i = this.a(modelClazz);
-        this.g = (String)this.i.getValue0();
-        this.h = (String)this.i.getValue1();
+        this.tableEntityPair = this.pairTableEntity(modelClazz);
+        this.tableName = (String)this.tableEntityPair.getValue0();
+        this.entityName = (String)this.tableEntityPair.getValue1();
         this.j = this.b(modelClazz);
         this.a = (String)this.j.getValue0();
         this.b = (String)this.j.getValue1();
@@ -119,10 +119,10 @@ public final class JpaAnnotatedModelInfo {
         return var1.build();
     }
 
-    private Pair<String, String> a(Class<?> var1) {
-        if(var1.isAnnotationPresent(Table.class)) {
-            String var2 = ((Table)var1.getAnnotation(Table.class)).name();
-            String var3 = ClassUtils.getShortClassName(var1);
+    private Pair<String, String> pairTableEntity(Class<?> var1) {
+        if(var1.isAnnotationPresent(Table.class)) {//该target是否被某个annotation修饰
+            String var2 = ((Table)var1.getAnnotation(Table.class)).name();//注解Table里面的name值
+            String var3 = ClassUtils.getShortClassName(var1);//类名的简称
             return Pair.with(var2, var3);
         } else {
             logger.error("Model: {} 没有未被 javax.persistence.Table 注解， 可能不符合预期。", ClassUtils.getSimpleName(var1));
@@ -131,8 +131,8 @@ public final class JpaAnnotatedModelInfo {
     }
 
     private Pair<String, String> b(Class<?> var1) {
-        List var2 = FieldUtils.getAllFieldsList(var1);
-        final ArrayList var3 = Lists.newArrayList(var1.getMethods());
+        List var2 = FieldUtils.getAllFieldsList(var1);//获取所有field
+        final ArrayList var3 = Lists.newArrayList(var1.getMethods());//获取所有方法
         Optional var4 = Iterables.tryFind(var2, Predicates.or(Predicates2.isAnnotationPresent(Id.class), Predicates.compose(new Predicate() {
             public boolean apply(@Nullable String getterName) {
                 return Iterables.any(var3, Predicates.and(Predicates2.isAnnotationPresent(Id.class), Predicates.compose(Predicates.equalTo(getterName), new Function() {
