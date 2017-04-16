@@ -12,6 +12,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableList.Builder;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -41,24 +43,25 @@ public final class JpaAnnotatedModelInfo {
     private String tableName;
     private String entityName;
     private Pair<String, String> tableEntityPair;//{qc_arb_complaints,ArbComplaints}元祖对象
-    private Pair<String, String> j;//{complaints_id,complaintId}元祖对象//{record_version,recordVersion}元祖对象
-    private Iterable<Pair<String, String>> k;
+    private Pair<String, String> idFieldPair;//{complaints_id,complaintId}元祖对象
+    private Pair<String, String> versionFieldPair;//{record_version,recordVersion}元祖对象
     private Iterable<Pair<String, String>> l;
-    private ImmutableBiMap<String, String> m;
+    private Iterable<Pair<String, String>> m;
+    private ImmutableBiMap<String, String> n;
     private Class<?> modelClazz;
-    private final Function<Field, String> o = new Function() {
+    private final Function<Field, String> p = new Function<Field, String>() {
         @Nullable
         public String apply(@Nullable Field columnUnAnnotatedField) {
             return "get" + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, columnUnAnnotatedField.getName());
         }
     };
-    private final Function<Pair<String, String>, String> p = new Function() {
+    private final Function<Pair<String, String>, String> q = new Function<Pair<String, String>, String>() {
         @Nullable
         public String apply(@Nullable Pair<String, String> columnNameFieldNamePair) {
             return (String)columnNameFieldNamePair.getValue0();
         }
     };
-    private final Function<Pair<String, String>, String> q = new Function() {
+    private final Function<Pair<String, String>, String> r = new Function<Pair<String, String>, String>() {
         @Nullable
         public String apply(@Nullable Pair<String, String> columnNameFieldNamePair) {
             return (String)columnNameFieldNamePair.getValue1();
@@ -73,16 +76,17 @@ public final class JpaAnnotatedModelInfo {
         this.tableEntityPair = this.pairTableEntity(modelClazz);
         this.tableName = (String)this.tableEntityPair.getValue0();
         this.entityName = (String)this.tableEntityPair.getValue1();
-        this.j = this.b(modelClazz);
+        this.idFieldPair = this.pairIdField(modelClazz);
         this.a = (String)this.j.getValue0();
         this.b = (String)this.j.getValue1();
-        this.l = this.c(modelClazz);
-        this.e = Iterables.transform(this.l, this.p);
-        this.f = Iterables.transform(this.l, this.q);
-        this.k = this.a();
-        this.c = Iterables.transform(this.k, this.p);
-        this.d = Iterables.transform(this.k, this.q);
-        this.m = this.b();
+        this.versionFieldPair = this.pairVersionField(modelClazz);
+        this.m = this.d(modelClazz);
+        this.e = Iterables.transform(this.m, this.q);
+        this.f = Iterables.transform(this.m, this.r);
+        this.l = this.a();
+        this.c = Iterables.transform(this.l, this.q);
+        this.d = Iterables.transform(this.l, this.r);
+        this.n = this.b();
     }
 
     public static JpaAnnotatedModelInfo of(Class<?> modelClazz) {
@@ -91,31 +95,33 @@ public final class JpaAnnotatedModelInfo {
 
     public JpaAnnotatedModelInfo excludeAnyFields(final Iterable<String> fieldNames) {
         JpaAnnotatedModelInfo var2 = new JpaAnnotatedModelInfo();
-        var2.modelClazz = this.modelClazz;
+        var2.o = this.o;
         var2.i = this.i;
         var2.g = this.g;
         var2.h = this.h;
         var2.j = this.j;
         var2.a = this.a;
         var2.b = this.b;
-        var2.l = Iterables.filter(this.l, new Predicate() {
+        var2.k = this.k;
+        var2.m = Iterables.filter(this.m, new Predicate<Pair<String, String>>() {
             public boolean apply(@Nullable Pair<String, String> input) {
-                return !Iterables.contains(fieldNames, input.getValue1());
+                String var2 = (String)input.getValue1();
+                return JpaAnnotatedModelInfo.this.hasVersionField() && var2.equals(JpaAnnotatedModelInfo.this.getVersionFieldName())?true:!Iterables.contains(fieldNames, var2);
             }
         });
-        var2.e = Iterables.transform(var2.l, this.p);
-        var2.f = Iterables.transform(var2.l, this.q);
-        var2.k = var2.a();
-        var2.c = Iterables.transform(var2.k, this.p);
-        var2.d = Iterables.transform(var2.k, this.q);
-        var2.m = var2.b();
+        var2.e = Iterables.transform(var2.m, this.q);
+        var2.f = Iterables.transform(var2.m, this.r);
+        var2.l = var2.a();
+        var2.c = Iterables.transform(var2.l, this.q);
+        var2.d = Iterables.transform(var2.l, this.r);
+        var2.n = var2.b();
         return var2;
     }
 
-    private ImmutableList<Pair<String, String>> a() {
+    private ImmutableList<Pair<String, String>> pairTableEntity() {
         Builder var1 = ImmutableList.builder();
-        var1.add(Pair.with(this.a, this.b));
-        var1.addAll(this.l);
+        var1.add(Pair.with(this.pkColumnName, this.pkFieldName));
+        var1.addAll(this.m);
         return var1.build();
     }
 
@@ -130,30 +136,47 @@ public final class JpaAnnotatedModelInfo {
         }
     }
 
-    private Pair<String, String> b(Class<?> var1) {
+    private Pair<String, String> pairIdField(Class<?> var1) {
         List var2 = FieldUtils.getAllFieldsList(var1);//获取所有field
-        final ArrayList var3 = Lists.newArrayList(var1.getMethods());//获取所有方法
-        Optional var4 = Iterables.tryFind(var2, Predicates.or(Predicates2.isAnnotationPresent(Id.class), Predicates.compose(new Predicate() {
-            public boolean apply(@Nullable String getterName) {
-                return Iterables.any(var3, Predicates.and(Predicates2.isAnnotationPresent(Id.class), Predicates.compose(Predicates.equalTo(getterName), new Function() {
-                    @Nullable
-                    public String apply(@Nullable Method modelMethod) {
-                        return modelMethod.getName();
-                    }
-                })));
-            }
-        }, this.o)));
+        ArrayList var3 = Lists.newArrayList(var1.getMethods());//获取所有方法
+        Optional var4 = Iterables.tryFind(var2, Predicates.or(Predicates2.isAnnotationPresent(Id.class), this.a((Class)Id.class, (Iterable)var3)));
         if(var4.isPresent()) {
             Field var5 = (Field)var4.get();
-            return this.a(var5);
+            return this.pairColumnField(var5);
         } else {
             logger.warn("Model: {} 没有javax.persistence.Id 字段信息， 可能不符合预期。", ClassUtils.getSimpleName(var1));
             return null;
         }
     }
 
-    private ImmutableList<Pair<String, String>> c(Class<?> var1) {
-        return ImmutableList.copyOf(Iterables.transform(this.d(var1), new Function() {
+    private Pair<String, String> pairVersionField(Class<?> var1) {
+        List var2 = FieldUtils.getAllFieldsList(var1);
+        ArrayList var3 = Lists.newArrayList(var1.getMethods());
+        Optional var4 = Iterables.tryFind(var2, Predicates.or(Predicates2.isAnnotationPresent(Version.class), this.pairTableEntity((Class)Version.class, (Iterable)var3)));
+        if(var4.isPresent()) {
+            Field var5 = (Field)var4.get();
+            return this.pairColumnField(var5);
+        } else {
+            return null;
+        }
+    }
+
+    //Predicates.compose 将Predicate和Function进行组合。将Function的结果作为Predicate的输入，然后进行判断过滤操作。
+    private Predicate<Field> pairTableEntity(final Class<? extends Annotation> var1, final Iterable<Method> var2) {
+        return Predicates.compose(new Predicate() {
+            public boolean apply(@Nullable String getterName) {
+                return Iterables.any(var2, Predicates.and(Predicates2.isAnnotationPresent(var1), Predicates.compose(Predicates.equalTo(getterName), new Function() {
+                    @Nullable
+                    public String apply(@Nullable Method modelMethod) {
+                        return modelMethod.getName();
+                    }
+                })));
+            }
+        }, this.p);
+    }
+
+    private ImmutableList<Pair<String, String>> d(Class<?> var1) {
+        return ImmutableList.copyOf(Iterables.transform(this.e(var1), new Function<Field,Pair<String, String>>() {
             @Nullable
             public Pair<String, String> apply(@Nullable Field columnAnnotatedField) {
                 return JpaAnnotatedModelInfo.this.a(columnAnnotatedField);
@@ -161,7 +184,7 @@ public final class JpaAnnotatedModelInfo {
         }));
     }
 
-    private Iterable<Field> d(Class<?> var1) {
+    private Iterable<Field> e(Class<?> var1) {
         final ArrayList var2 = Lists.newArrayList(var1.getMethods());
         return ImmutableList.copyOf(Iterables.filter(FieldUtils.getAllFieldsList(var1), Predicates.or(Predicates.and(Predicates.not(Predicates2.isAnnotationPresent(Id.class)), Predicates2.isAnnotationPresent(Column.class)), Predicates.compose(new Predicate() {
             public boolean apply(@Nullable String getterName) {
@@ -172,10 +195,10 @@ public final class JpaAnnotatedModelInfo {
                     }
                 })));
             }
-        }, this.o))));
+        }, this.p))));
     }
 
-    private Pair<String, String> a(Field var1) {
+    private Pair<String, String> pairColumnField(Field var1) {
         String var2 = var1.getName();
         if(var1.isAnnotationPresent(Column.class)) {
             String var3 = ((Column)var1.getAnnotation(Column.class)).name();
@@ -187,7 +210,7 @@ public final class JpaAnnotatedModelInfo {
 
     private ImmutableBiMap<String, String> b() {
         com.google.common.collect.ImmutableBiMap.Builder var1 = ImmutableBiMap.builder();
-        Iterator var2 = this.k.iterator();
+        Iterator var2 = this.l.iterator();
 
         while(var2.hasNext()) {
             Pair var3 = (Pair)var2.next();
@@ -234,15 +257,35 @@ public final class JpaAnnotatedModelInfo {
     }
 
     public String getFieldNameByColumnName(String columnName) {
-        return (String)this.m.get(columnName);
+        return (String)this.n.get(columnName);
     }
 
     public String getColumnNameByFieldName(String fieldName) {
-        return (String)this.m.inverse().get(fieldName);
+        return (String)this.n.inverse().get(fieldName);
     }
 
     public Field getPkField() {
-        return StringUtils.isNotEmpty(this.b)?FieldUtils.getField(this.n, this.b, true):null;
+        return StringUtils.isNotEmpty(this.b)?FieldUtils.getField(this.o, this.b, true):null;
+    }
+
+    public boolean hasVersionField() {
+        return this.k != null;
+    }
+
+    public boolean isVersionColumnName(String columnName) {
+        return this.hasVersionField() && StringUtils.equals(columnName, this.getVersionColumnName());
+    }
+
+    public boolean isVersionFieldName(String columnName) {
+        return this.hasVersionField() && StringUtils.equals(columnName, this.getVersionFieldName());
+    }
+
+    public String getVersionFieldName() {
+        return (String)this.k.getValue1();
+    }
+
+    public String getVersionColumnName() {
+        return (String)this.k.getValue0();
     }
 
     public Optional<Field> getPkFieldOpt() {
@@ -251,10 +294,10 @@ public final class JpaAnnotatedModelInfo {
     }
 
     public Class<?> getModelClazz() {
-        return this.modelClazz;
+        return this.o;
     }
 
     public String toString() {
-        return (new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)).append("pkColumnName", this.a).append("pkFieldName", this.b).append("allColumnNames", this.c).append("allFieldNames", this.d).append("allColumnNamesWithoutPk", this.e).append("allFieldNamesWithoutPk", this.f).append("tableName", this.g).append("entityName", this.h).append("tableNameEntityNamePair", this.i).append("pkColumnNameFieldNamePair", this.j).append("columnNameFieldNamePairs", this.k).append("columnNameFieldNamePairsWithoutPk", this.l).append("allColumnNameFieldNameMap", this.m).append("modelClazz", this.n).append("fieldToGetterNameTransformer", this.o).append("toColumnNamesTransformer", this.p).append("toFieldNamesTransformer", this.q).toString();
+        return (new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)).append("pkColumnName", this.a).append("pkFieldName", this.b).append("allColumnNames", this.c).append("allFieldNames", this.d).append("allColumnNamesWithoutPk", this.e).append("allFieldNamesWithoutPk", this.f).append("tableName", this.g).append("entityName", this.h).append("tableNameEntityNamePair", this.i).append("pkColumnNameFieldNamePair", this.j).append("columnNameFieldNamePairs", this.l).append("columnNameFieldNamePairsWithoutPk", this.m).append("allColumnNameFieldNameMap", this.n).append("modelClazz", this.o).append("fieldToGetterNameTransformer", this.p).append("toColumnNamesTransformer", this.q).append("toFieldNamesTransformer", this.r).toString();
     }
 }
