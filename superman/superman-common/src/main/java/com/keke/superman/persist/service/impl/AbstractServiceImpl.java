@@ -1,13 +1,17 @@
 package com.keke.superman.persist.service.impl;
 
+import com.keke.superman.persist.annotation.Generator;
+import com.keke.superman.persist.generator.IGenerator;
 import com.keke.superman.persist.mapper.BaseMapper;
-import com.keke.superman.persist.model.BaseExample;
-import com.keke.superman.persist.model.BaseModel;
-import com.keke.superman.persist.model.NotCountPage;
-import com.keke.superman.persist.model.Page;
+import com.keke.superman.persist.model.*;
 import com.keke.superman.persist.service.AbstractService;
+import com.keke.superman.util.ContextHolder;
 import com.keke.superman.util.Reflections;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
+
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -18,27 +22,27 @@ public class AbstractServiceImpl<PK extends Serializable, Model extends BaseMode
 {
     public int countByExample(Example example)
     {
-        return a().countByExample(example);
+        return getBaseMapper().countByExample(example);
     }
 
     public int deleteByExample(Example example)
     {
-        return a().deleteByExample(example);
+        return getBaseMapper().deleteByExample(example);
     }
 
     public int deleteByPrimaryKey(PK primaryKey)
     {
-        return a().deleteByPrimaryKey(primaryKey);
+        return getBaseMapper().deleteByPrimaryKey(primaryKey);
     }
 
     public Model insertSelective(Model record)
     {
-        a(record);
-        a().insertSelective(record);
+        generatePkField(record);
+        getBaseMapper().insertSelective(record);
         return record;
     }
 
-    private void a(Model paramModel)
+    private void generatePkField(Model paramModel)
     {
         if (paramModel != null)
         {
@@ -52,7 +56,7 @@ public class AbstractServiceImpl<PK extends Serializable, Model extends BaseMode
                 String str2 = localGenerator.value();
                 if (StringUtils.isNotEmpty(str2))
                 {
-                    IGenerator localIGenerator = (IGenerator)ContextHolder.getBean(str2);
+                    IGenerator localIGenerator = (IGenerator) ContextHolder.getBean(str2);
                     localObject = localIGenerator.generate(paramModel.getClass());
                     Reflections.setFieldValue(paramModel, str1, localObject);
                 }
@@ -62,7 +66,7 @@ public class AbstractServiceImpl<PK extends Serializable, Model extends BaseMode
 
     public List<Model> selectByExample(Example example)
     {
-        return a().selectByExample(example);
+        return getBaseMapper().selectByExample(example);
     }
 
     public Page selectPageByExample(Example example)
@@ -78,27 +82,27 @@ public class AbstractServiceImpl<PK extends Serializable, Model extends BaseMode
 
     public Model selectOneByExample(Example example)
     {
-        return a().selectOneByExample(example);
+        return getBaseMapper().selectOneByExample(example);
     }
 
     public Model selectByPrimaryKey(PK primaryKey)
     {
-        return a().selectByPrimaryKey(primaryKey);
+        return getBaseMapper().selectByPrimaryKey(primaryKey);
     }
 
     public Model selectByPrimaryKeyInMasterDb(PK primaryKey)
     {
-        return a().selectByPrimaryKeyInMasterDb(primaryKey);
+        return getBaseMapper().selectByPrimaryKeyInMasterDb(primaryKey);
     }
 
     public int updateByExampleSelective(Model record, Example example)
     {
-        return a().updateByExampleSelective(record, example);
+        return getBaseMapper().updateByExampleSelective(record, example);
     }
 
     public Model updateByPrimaryKeySelective(Model record)
     {
-        if (a().updateByPrimaryKeySelective(record) > 0) {
+        if (getBaseMapper().updateByPrimaryKeySelective(record) > 0) {
             return record;
         }
         return null;
@@ -106,7 +110,7 @@ public class AbstractServiceImpl<PK extends Serializable, Model extends BaseMode
 
     public Model updateByPrimaryKey(Model record)
     {
-        if (a().updateByPrimaryKey(record) > 0) {
+        if (getBaseMapper().updateByPrimaryKey(record) > 0) {
             return record;
         }
         return null;
@@ -122,7 +126,7 @@ public class AbstractServiceImpl<PK extends Serializable, Model extends BaseMode
         }
         else
         {
-            a(record);
+            generatePkField(record);
             insertSelective(record);
         }
         return record;

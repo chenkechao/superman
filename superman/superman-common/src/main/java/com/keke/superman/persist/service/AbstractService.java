@@ -21,19 +21,18 @@ public abstract class AbstractService<PK extends Serializable, Model extends Bas
         implements IService<PK, Model, Example, Mapper>
 {
     public final Logger a = LoggerFactory.getLogger(getClass());
-    protected BaseMapper<PK, Model, Example> b;
+    protected BaseMapper<PK, Model, Example> baseMapper;
 
-    protected BaseMapper<PK, Model, Example> a()
+    protected BaseMapper<PK, Model, Example> getBaseMapper()
     {
-        if (this.b == null) {
-            this.b = ((BaseMapper)b().get());
+        if (this.baseMapper == null) {
+            this.baseMapper = ((BaseMapper)findBaseMapper().get());
         }
-        return this.b;
+        return this.baseMapper;
     }
 
     //TODO
-    //private Optional<BaseMapper<PK, Model, Example>> b()
-    private Optional<BaseMapper> b()
+    private Optional<BaseMapper<PK, Model, Example>> findBaseMapper()
     {
         Type localType = getClass().getGenericSuperclass();
         if (TypeUtils.isInstance(localType, ParameterizedType.class))
@@ -41,7 +40,7 @@ public abstract class AbstractService<PK extends Serializable, Model extends Bas
             ParameterizedType localParameterizedType = (ParameterizedType)localType;
             Type[] arrayOfType = localParameterizedType.getActualTypeArguments();
             Class localClass = (Class)arrayOfType[3];
-            BaseMapper localBaseMapper = (BaseMapper) ContextHolder.getBean(localClass);
+            BaseMapper<PK, Model, Example> localBaseMapper = (BaseMapper) ContextHolder.getBean(localClass);
             return Optional.of(localBaseMapper);
         }
         throw new CannotResolverMapperByGenericTypeException();
