@@ -5,12 +5,12 @@
     <parent>
         <artifactId>superman-base-parent</artifactId>
         <groupId>com.keke</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
         <relativePath>../superman-base-parent/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.keke</groupId>
     <artifactId>superman-base-business</artifactId>
+    <version>${base.version}</version>
     <packaging>war</packaging>
 
     <properties>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.keke</groupId>
             <artifactId>superman-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
@@ -73,12 +73,38 @@
             <artifactId>mybatis-spring</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.gillion</groupId>
+            <artifactId>mybatis-mysql-plugin</artifactId>
+            <scope>provided</scope>
+            <classifier>pg</classifier>
+        </dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis.generator</groupId>
+            <artifactId>mybatis-generator-maven-plugin</artifactId>
+            <version>1.3.2</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>sisu-guava</artifactId>
+                    <groupId>org.sonatype.sisu</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>google-collect</artifactId>
+                    <groupId>com.google.code.google-collections</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>maven-project</artifactId>
+                    <groupId>org.apache.maven</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
     <profiles>
@@ -137,6 +163,82 @@
                     <webappDirectory>${basedir}/web</webappDirectory>
                     <warSourceDirectory>${basedir}/web</warSourceDirectory>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.mybatis.generator</groupId>
+                <artifactId>mybatis-generator-maven-plugin</artifactId>
+                <version>1.3.2</version>
+                <configuration>
+                    <verbose>true</verbose>
+                    <overwrite>true</overwrite>
+                    <configurationFile>${basedir}/src/main/resources/maven_build/mybatis-generator-entity.xml</configurationFile>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.gillion</groupId>
+                        <artifactId>gillion-inc-pk-client</artifactId>
+                        <version>1.0.0.3.RELEASE</version>
+                        <classifier>pg</classifier>
+                    </dependency>
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>5.1.32</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.gillion</groupId>
+                        <artifactId>gillion-web-quick</artifactId>
+                        <version>2.2.4.3.RELEASE</version>
+                        <classifier>pg</classifier>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-lang3</artifactId>
+                        <version>3.3.2</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                        <version>2.4</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.github.javaparser</groupId>
+                        <artifactId>javaparser-core</artifactId>
+                        <version>2.2.2</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>com.gillion</groupId>
+                <artifactId>mybatis-mysql-plugin</artifactId>
+                <version>1.0.3.3.RELEASE</version>
+                <configuration>
+                    <configRootDir>${basedir}/src/main/resources/maven_build/mysqlConfig</configRootDir>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.gillion</groupId>
+                        <artifactId>gillion-inc-pk-client</artifactId>
+                        <version>1.0.0.3.RELEASE</version>
+                        <classifier>pg</classifier>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                        <version>${slf4j.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>5.1.32</version>
+                    </dependency>
+
+
+
+                </dependencies>
             </plugin>
         </plugins>
     </build>
