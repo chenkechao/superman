@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration>
+    <properties resource="${db.config.file}"/>
+    <context id="ec.user" targetRuntime="MyBatis3">
+        <plugin type="org.mybatis.generator.plugins.CaseInsensitiveLikePlugin">
+        </plugin>
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"></plugin>
+        <plugin type="com.gfa4j.mybatis.generator.plugins.ModelExamplePlugin"></plugin>
+
+        <plugin type="com.gillion.repair.LongValueRepairAnnotationPlugin"/>
+        <!-- 自动生成，覆盖插件 -->
+        <plugin type="com.gfa4j.mybatis.generator.plugins.SelectByExampleSelectivePlugin"></plugin>
+		<plugin type="com.gfa4j.mybatis.generator.plugins.MapperXmlCoverRepairPlugin"></plugin>
+		<plugin type="com.gfa4j.mybatis.generator.plugins.AnnotationSavePlugin"></plugin>
+        <plugin type="com.gfa4j.mybatis.generator.plugins.ModelCommentPlugin" /><!--生成注释-->
+
+        <!--自动注解插件 begin-->
+        <!--持久化注解插件-->
+        <plugin type="com.gfa4j.mybatis.generator.plugins.annotation.PersistenceAnnotationPlugin">
+        </plugin>
+
+        <!--主键生成插件：三种算法：uuid、snowFlake算法，区块自增-->
+        <plugin type="com.gfa4j.mybatis.generator.plugins.annotation.PKGeneratorPlugin">
+            <property name="generator" value="flakeGenerator"/>
+        </plugin>
+
+        <!--通用字段插件-->
+        <plugin type="com.gfa4j.mybatis.generator.plugins.annotation.HandlerAnnotationPlugin">
+            <property name="creater.handler" value="com.ymdd.galaxy.common.handler.CreaterHandler"/>
+            <property name="creater_time.handler" value="com.ymdd.galaxy.common.handler.CreaterTimeHandler"/>
+            <property name="modifier.handler" value="com.ymdd.galaxy.common.handler.ModifierHandler"/>
+            <property name="modifier_time.handler" value="com.ymdd.galaxy.common.handler.ModifierTimeHandler"/>
+            <property name="is_delete.handler" value="com.ymdd.galaxy.common.handler.IsDeleteHandler"/>
+        </plugin>
+
+        <!--乐观锁插件-->
+        <plugin type="com.gfa4j.mybatis.generator.plugins.annotation.RecordVersionPlugin">
+            <property name="recordVersionColumnName" value="record_version"/>
+        </plugin>
+
+        <!--模糊查询匹配插件  like('%ddd%')-->
+        <plugin type="com.gfa4j.mybatis.generator.plugins.FuzzyQueryPlugin"/>
+
+
+        <!--单行查询插件-->
+        <plugin type="com.gfa4j.mybatis.generator.plugins.SelectOneByExamplePlugin"></plugin>
+
+        <!--mysql分页插件-->
+        <plugin type="com.gfa4j.mybatis.generator.plugins.MySqlPaginationPlugin"></plugin>
+
+
+        <!--自动注解插件 end-->
+        <plugin type="com.gfa4j.mybatis.generator.plugins.MapperAndSqlMapGeneratorPlugin"/>
+
+        <!-- 取消注释 -->
+        <commentGenerator>
+            <property name="suppressDate" value="true"/>
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+        <!-- 配置连接数据信息 -->
+        <jdbcConnection driverClass="${jdbc.driverClassName}" connectionURL="${jdbc.url}" userId="${jdbc.username}"
+                        password="${jdbc.password}"/>
+        <!-- 配置自动生成的Model的保存路径与其它参数 -->
+        <javaModelGenerator targetPackage="${package.path}.model" targetProject="${java.file.dir}">
+            <property name="rootClass" value="com.gfa4j.mybatis.model.BaseModel"/>
+        </javaModelGenerator>
+        <!-- 配置自动生成的Mappper.xml映射的保存路径与其它参数 -->
+        <sqlMapGenerator targetPackage="${package.path}.mapper" targetProject="${resources.file.dir}">
+        </sqlMapGenerator>
+        <!-- 配置自动生成的Mappper.java接口的保存路径与其它参数 -->
+        <javaClientGenerator type="XMLMAPPER" targetPackage="${package.path}.mapper" targetProject="${java.file.dir}">
+            <property name="rootInterface" value="com.gfa4j.mybatis.mapper.BaseMapper"/>
+        </javaClientGenerator>
+
+  <!--  <table tableName="base_bdm_arbitrate_type" domainObjectName="ArbitrateType"></table>
+        <table tableName="base_bdm_department" domainObjectName="Department"></table>
+        <table tableName="base_bdm_heavy_bubble_ratio" domainObjectName="HeavyBubbleRatio"></table>
+        <table tableName="base_bdm_neer_province_rel" domainObjectName="NeerProvinceRel"></table>
+        <table tableName="base_bdm_product_type" domainObjectName="ProductType"></table>
+        <table tableName="base_bdm_product_type_apply" domainObjectName="ProductTypeApply"></table>
+        <table tableName="base_bdm_sms_template" domainObjectName="SmsTemplate"></table>
+        <table tableName="base_dad_dictionary" domainObjectName="Dictionary"></table>
+        <table tableName="base_dad_dictionary_config" domainObjectName="DictionaryConfig"></table>
+        <table tableName="base_dad_dictionary_value" domainObjectName="DictionaryValue"></table>
+        <table tableName="base_exp_waybillno_create" domainObjectName="WaybillnoCreate"></table>
+        <table tableName="base_exp_waybillno_grant" domainObjectName="WaybillnoGrant"></table>
+        <table tableName="base_net_district" domainObjectName="District"></table>
+        <table tableName="base_net_section" domainObjectName="Section"></table>
+        <table tableName="base_net_dept_base_apply" domainObjectName="DeptBaseApply"></table>
+        <table tableName="base_net_dept_base_info" domainObjectName="DeptBaseInfo"></table>
+        <table tableName="base_net_dept_audit" domainObjectName="DeptAudit"></table>
+        <table tableName="base_net_dept_finance" domainObjectName="DeptFinance"></table>
+        <table tableName="base_net_dept_product_attribute" domainObjectName="DeptProductAttribute"></table>
+        <table tableName="base_net_dept_value_add" domainObjectName="DeptValueAdd"></table>
+        <table tableName="base_net_dept_zone" domainObjectName="DeptZone">
+          <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+        </table>
+        <table tableName="base_net_structure" domainObjectName="Structure"></table>
+        <table tableName="base_net_structure_org" domainObjectName="StructureOrg"></table>
+        <table tableName="base_net_zone" domainObjectName="Zone"></table>
+        <table tableName="base_sys_company" domainObjectName="Company">
+            <columnOverride column="allow_msg" javaType="java.lang.Byte"/>
+            <columnOverride column="state" javaType="java.lang.Byte"/>
+            <columnOverride column="comp_type" javaType="java.lang.Byte"/>
+            <columnOverride column="settlement_entity" javaType="java.lang.Byte"/>
+            <columnOverride column="is_delete" javaType="java.lang.Byte"/>
+        </table>
+         <table tableName="base_net_level" domainObjectName="Level">
+            <columnOverride column="net_level" javaType="java.lang.Byte"/>
+        </table>
+        	<table tableName="base_net_structure" domainObjectName="Structure">
+    		<columnOverride column="is_delete" javaType="java.lang.Integer"/>
+         	<columnOverride column="type" javaType="java.lang.Integer"/>
+
+         </table>
+         -->
+        <!--
+  		 <table tableName="base_net_section" domainObjectName="Section">
+            <columnOverride column="dept_grade" javaType="java.lang.Integer"/>
+            <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+            <columnOverride column="section_level" javaType="java.lang.Integer"/>
+            <columnOverride column="type" javaType="java.lang.Integer"/>
+        	</table>
+        -->
+        <!--
+        <table tableName="base_bdm_business_department" domainObjectName="BusinessDepartment">
+            <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+        </table>
+        -->
+        <table tableName="base_net_dept_base_apply" domainObjectName="DeptBaseApply">
+            <columnOverride column="dept_type" javaType="java.lang.Integer"/>
+            <columnOverride column="line_type_code" javaType="java.lang.Integer"/>
+            <columnOverride column="status" javaType="java.lang.Integer"/>
+            <columnOverride column="service_type_default" javaType="java.lang.Integer"/>
+            <columnOverride column="pay_type_default" javaType="java.lang.Integer"/>
+            <columnOverride column="is_resident_dept" javaType="java.lang.Integer"/>
+            <columnOverride column="is_cross_province" javaType="java.lang.Integer"/>
+            <columnOverride column="is_collect_delivery" javaType="java.lang.Integer"/>
+            <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+        </table>
+        <table tableName="base_net_dept_base_info" domainObjectName="DeptBaseInfo">
+            <columnOverride column="dept_type" javaType="java.lang.Integer"/>
+            <columnOverride column="line_type_code" javaType="java.lang.Integer"/>
+            <columnOverride column="status" javaType="java.lang.Integer"/>
+            <columnOverride column="service_type_default" javaType="java.lang.Integer"/>
+            <columnOverride column="pay_type_default" javaType="java.lang.Integer"/>
+            <columnOverride column="is_resident_dept" javaType="java.lang.Integer"/>
+            <columnOverride column="is_cross_province" javaType="java.lang.Integer"/>
+            <columnOverride column="is_collect_delivery" javaType="java.lang.Integer"/>
+            <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+        </table>
+        <!--
+        <table tableName="base_net_dept_audit" domainObjectName="DeptAudit">
+            <columnOverride column="status" javaType="java.lang.Integer"/>
+            <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+        </table>
+        <table tableName="base_net_dept_finance" domainObjectName="DeptFinance">
+            <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+        </table>
+        <table tableName="base_net_dept_product_attribute" domainObjectName="DeptProductAttribute">
+            <columnOverride column="company_dept_type" javaType="java.lang.Integer"/>
+            <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+        </table>
+        <table tableName="base_net_dept_value_add" domainObjectName="DeptValueAdd">
+            <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+        </table>
+        <table tableName="base_sys_company" domainObjectName="Company">
+            <columnOverride column="allow_msg" javaType="java.lang.Integer"/>
+            <columnOverride column="state" javaType="java.lang.Integer"/>
+            <columnOverride column="comp_type" javaType="java.lang.Integer"/>
+            <columnOverride column="settlement_entity" javaType="java.lang.Integer"/>
+            <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+        </table>
+         <table tableName="base_waybill_remark" domainObjectName="WaybillRemark">
+   		<columnOverride column="type" javaType="java.lang.Integer"/>
+	 	<columnOverride column="status" javaType="java.lang.Integer"/>
+    	</table>
+        <table tableName="base_net_zone" domainObjectName="Zone">
+            <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+            <columnOverride column="state" javaType="java.lang.Integer"/>
+        <table tableName="base_bdm_forward_zone" domainObjectName="ForwardZone">
+ 		<columnOverride column="calc_lock" javaType="java.lang.Integer"/>
+ 		<columnOverride column="calc_mode" javaType="java.lang.Integer"/>
+ 		<columnOverride column="is_delete" javaType="java.lang.Integer"/>
+        -->
+        <!--<table tableName="base_net_level" domainObjectName="Level">
+            <columnOverride column="net_level" javaType="java.lang.Integer"/>
+        </table>-->
+  <!--  <table tableName="base_message" domainObjectName="BdmQcType">
+       <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+	</table> -->
+ 	<!-- <table tableName="base_message" domainObjectName="Message">
+       <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+              <columnOverride column="status" javaType="java.lang.Integer"/>
+       
+	</table>  -->
+<!--	 <table tableName="base_message_reader" domainObjectName="MessageReader">
+  <table tableName="base_message_reader" domainObjectName="MessageReader">
+       <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+	</table> -->
+       <!--  <table tableName="base_bdm_print_layout_manage" domainObjectName="BdmPrintLayoutManage">
+            <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+            <columnOverride column="directs" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <columnOverride column="bg_data" jdbcType="VARCHAR" javaType="java.lang.String"/>
+            <columnOverride column="layout_type" javaType="java.lang.Integer"/>
+            <columnOverride column="preview" javaType="java.lang.Integer"/>
+        </table> -->
+	
+  <!--  <table tableName="base_bdm_product_type" domainObjectName="BdmProductType">
+       <columnOverride column="quick_code" jdbcType="VARCHAR" javaType="java.lang.String"/>
+       <columnOverride column="status" javaType="java.lang.Integer"/>
+       <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+       <columnOverride column="goods_status" javaType="java.lang.Integer"/>
+       <columnOverride column="isvalid" javaType="java.lang.Integer"/>
+    </table> -->
+   <!-- <table tableName="base_bdm_product_type_apply" domainObjectName="ProductTypeApply">
+       <columnOverride column="is_allow_arrive" javaType="java.lang.Integer"/>
+       <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+    </table> -->
+       <!-- <table tableName="base_bdm_weight_volumn_ratio" domainObjectName="WeightRatio">
+            <columnOverride column="is_delete" javaType="java.lang.Integer"/>
+        </table>-->
+	<!-- 网点企业配置 -->
+	<!-- <table tableName="base_bdm_dept_comp_configure" domainObjectName="DeptCompConfigureInfo">
+		<columnOverride column="settlement_type" javaType="java.lang.Integer" />
+		<columnOverride column="is_delete" javaType="java.lang.Integer" />
+	</table> -->
+	<!-- 打印机配置表 -->
+        <!--
+	<table tableName="base_bdm_printer_conf" domainObjectName="PrinterConfInfo">
+		<columnOverride column="is_delete" javaType="java.lang.Integer" />
+	</table>
+    -->
+    <!-- <table tableName="fs_file_info" domainObjectName="FsFileInfo">
+	</table> -->
+	
+	<!-- 运单号发放 -->
+	<!-- <table tableName="base_exp_waybillno_grant" domainObjectName="WaybillnoGrant">
+		<columnOverride column="grant_type" javaType="java.lang.Integer" />
+		<columnOverride column="grant_format" javaType="java.lang.Integer" />
+		<columnOverride column="grant_status" javaType="java.lang.Integer" />
+		<columnOverride column="is_delete" javaType="java.lang.Integer" />
+	</table> -->
+	
+	<!-- <table tableName="base_bdm_platform_config" domainObjectName="PlatformConfigModel">
+		<columnOverride column="is_delete" javaType="java.lang.Integer" />
+	</table> -->
+    
+    </context>
+</generatorConfiguration>
