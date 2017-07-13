@@ -14,8 +14,16 @@
     <packaging>war</packaging>
 
     <properties>
+        <!-- 工程名(同时被logback.xml引用) -->
+        <project_name>${project.artifactId}</project_name>
         <!-- 数据库配置(mybatis-genertor-config) -->
         <db.config.file>env/dev.properties</db.config.file>
+        <!-- java代码目录 -->
+        <java.file.dir>${basedir}/src/main/java</java.file.dir>
+        <!-- 资源文件目录 -->
+        <resources.file.dir>${basedir}/src/main/resources</resources.file.dir>
+        <!-- 包名 -->
+        <package.path>com.keke.superman.base.entity.base</package.path>
     </properties>
 
     <dependencies>
