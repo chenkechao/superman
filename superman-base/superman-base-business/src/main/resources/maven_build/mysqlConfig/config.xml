@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<builders>
+    <properties>
+        <!---MySQL数据库JDBC-->
+        <property name="jdbc">com.mysql.jdbc.Driver</property>
+        <!---MySQL数据库URL-->
+        <property name="url">jdbc:mysql://10.10.0.102:3306/base?allowMultiQueries=true</property>
+        <!---MySQL数据库 账号-->
+        <property name="username">root</property>
+        <!---MySQL数据库密码-->
+        <property name="password">MySQL@123</property>
+        <!---生成文件是否覆盖 默认覆盖 true-->
+        <property name="newcreatefile">true</property>
+        <!---前缀包名  可不配置-->
+        <property name="prefixPackage">com.keke.superman.base.entity.custom</property>
+    </properties>
+    <!--多个同名实体采用name别名指定相应实体-->
+
+    <!--指定mapper参数数量的显示的最大值，当指定了参数显示最大值时生成的mapper参数会自动匹配,不指定则默认为５-->
+    <mapper-parameter>3</mapper-parameter>
+
+    <!--实体所在包名-->
+<!--    <entity-package>com.ymdd.galaxy.base.entity.example.custom</entity-package>-->
+
+
+    <type-transformers>
+        <type-transformer>
+            <jdbc-type>TINYINT</jdbc-type>
+            <java-type>java.lang.Integer</java-type>
+        </type-transformer>
+        <type-transformer>
+            <jdbc-type>BIT</jdbc-type>
+            <java-type>java.lang.Integer</java-type>
+        </type-transformer>
+    </type-transformers>
+</builders>
