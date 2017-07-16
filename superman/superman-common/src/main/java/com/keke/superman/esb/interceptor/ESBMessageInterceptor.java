@@ -6,7 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.keke.superman.configuration.ServerConfiguration;
+import com.keke.superman.esb.configuration.ServerConfiguration;
 import com.keke.superman.esb.request.Request;
 import com.keke.superman.esb.request.RequestHeader;
 import com.keke.superman.esb.response.Response;

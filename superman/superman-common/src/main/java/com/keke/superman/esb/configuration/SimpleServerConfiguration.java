@@ -1,4 +1,4 @@
-package com.keke.superman.configuration;
+package com.keke.superman.esb.configuration;
 
 import com.google.common.collect.Lists;
 import com.keke.superman.esb.plugins.ServerPlugin;
