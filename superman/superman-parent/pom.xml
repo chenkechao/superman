@@ -878,6 +878,12 @@
                 <version>1.0.29</version>
             </dependency>
 
+
+            <dependency>
+                <groupId>com.baidu.disconf</groupId>
+                <artifactId>disconf-client</artifactId>
+                <version>2.6.36</version>
+            </dependency>
             <!-- google java library -->
             <dependency>
                 <groupId>com.google.guava</groupId>
