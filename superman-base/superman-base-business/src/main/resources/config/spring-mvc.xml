@@ -10,7 +10,11 @@
     <description>Spring MVC配置文件</description>
 
 
-    <!-- REST中根据URL后缀自动判定Content-Type及相应的View -->
+    <!-- REST中根据URL后缀自动判定Content-Type及相应的View
+         内置的内容协商策略和扩展名解析器，将request中的mediaType解析出来，并找到对应的后缀名，可以认为本来有2个作用
+         1 通过request解析出对应的mediaType
+         2 获取全部或者mediaType对应的后缀名
+     -->
     <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
         <property name="ignoreAcceptHeader" value="true"/>
         <property name="defaultContentType" value="application/json"/>
@@ -22,10 +26,11 @@
         </property>
     </bean>
 
+    <!--使用ConversionService及自定义转换器-->
     <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
         <property name="converters">
             <set>
-                <bean class="com.gfa4j.converter.DateConverter"/>
+                <bean class="com.keke.superman.converter.DateConverter"/>
             </set>
         </property>
     </bean>
@@ -33,9 +38,12 @@
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**/esb/**"/>
-            <bean class="com.gillion.esb.api.interceptor.ESBMessageInterceptor"/>
+            <bean class="com.keke.superman.esb.interceptor.ESBMessageInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>
+
+    <!--content-negotiation-manager用来支持内容协商-->
+    <!--conversion-service自定义转换器-->
     <mvc:annotation-driven  conversion-service="conversionService" content-negotiation-manager="contentNegotiationManager">
 
         <mvc:message-converters>
@@ -50,7 +58,7 @@
                 对JSON格式的处理，其中默认的defaultMessageConverter配置为原先系统的JSON处理，同时路径配置为/
                 对ESB发送过来的消息处理，路径自定义，以下给个例子为：/**/esb/**
             -->
-            <bean class="com.gillion.esb.api.converter.JSONMessageConverter">
+            <bean class="com.keke.superman.esb.converter.JSONMessageConverter">
                 <property name="converterPathMap">
                     <map>
                         <entry key-ref="defaultMessageConverter">
@@ -83,7 +91,7 @@
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**/esb/**"/>
-            <bean class="com.gillion.esb.api.interceptor.ESBMessageInterceptor"/>
+            <bean class="com.keke.superman.esb.interceptor.ESBMessageInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>
 
@@ -96,55 +104,55 @@
 
 
     <!--esb begin -->
-    <bean id="serverConfiguration" class="com.gillion.esb.api.configuration.SimpleServerConfiguration">
+    <bean id="serverConfiguration" class="com.keke.superman.esb.configuration.SimpleServerConfiguration">
         <property name="providerSysId" value="hello" />
         <property name="serverPlugins">
             <list>
-                <bean class="com.gillion.esb.api.plugins.transaction.TransactionServerPlugin"></bean>
+                <bean class="com.keke.superman.esb.plugins.transaction.TransactionServerPlugin"></bean>
             </list>
         </property>
         <!--<property name="returnExceptionStack" value="true"/>-->
     </bean>
 
     <!--ESB信息转换-->
-    <bean id="esbMessageConverter" class="com.gillion.esb.api.converter.ESBMessageConverter">
+    <bean id="esbMessageConverter" class="com.keke.superman.esb.converter.ESBMessageConverter">
         <property name="supportedMediaTypes">
             <list>
                 <value>application/json;charset=UTF-8</value>
             </list>
         </property>
         <property name="objectMapper">
-            <util:constant static-field="com.gfa4j.utils.JsonMapperHolder.objectMapper"></util:constant>
+            <util:constant static-field="com.keke.superman.esb.util.JsonMapperHolder.objectMapper"></util:constant>
         </property>
         <property name="serverConfiguration" ref="serverConfiguration"></property>
     </bean>
 
-    <bean id="defaultMessageConverter" class="com.gfa4j.converter.GillionJsonConverter">
+    <bean id="defaultMessageConverter" class="com.keke.superman.converter.GillionJsonConverter">
         <property name="supportedMediaTypes">
             <list>
                 <value>application/json;charset=UTF-8</value>
             </list>
         </property>
         <property name="objectMapper">
-            <util:constant static-field="com.gfa4j.utils.JsonMapperHolder.objectMapper"/>
+            <util:constant static-field="com.keke.superman.esb.util.JsonMapperHolder.objectMapper"/>
         </property>
     </bean>
 
-    <bean class="com.gfa4j.validation.web.advice.ValidationErrorHandler">
+    <bean class="com.keke.superman.validation.web.advice.ValidationErrorHandler">
     </bean>
 
-    <bean name="exceptionConfiguration" class="com.gillion.esb.api.exception.ESBServerExceptionConfiguration">
+    <bean name="exceptionConfiguration" class="com.keke.superman.esb.exception.ESBServerExceptionConfiguration">
         <property name="exceptionServiceCode" value="exception-loader"/>
     </bean>
 
 
 
-    <bean id="exceptionResolver" class="com.gillion.esb.api.exception.MultiHandlerExceptionResolver">
+    <bean id="exceptionResolver" class="com.keke.superman.esb.exception.MultiHandlerExceptionResolver">
         <property name="resolverMap">
             <map>
                 <entry>
                     <key>
-                        <bean class="com.gfa4j.exception.GillionHandlerExceptionResolver">
+                        <bean class="com.keke.superman.exception.GillionHandlerExceptionResolver">
                         </bean>
                     </key>
                     <list>
@@ -153,7 +161,7 @@
                 </entry>
                 <entry>
                     <key>
-                        <bean id="esbExceptionResolver" class="com.gillion.esb.api.exception.ESBHandlerExceptionResolver">
+                        <bean id="esbExceptionResolver" class="com.keke.superman.esb.exception.ESBHandlerExceptionResolver">
                             <property name="exceptionConfiguration" ref="exceptionConfiguration" />
                             <property name="serverConfiguration" ref="serverConfiguration" />
                         </bean>
@@ -165,13 +173,13 @@
             </map>
         </property>
     </bean>
-    <bean id="gridLayoutController" class="com.gfa4j.datagrid.layout.controller.GridLayoutController"/>
-    <bean class="com.gillion.esb.api.util.ESBContextHolder"/>
+    <bean id="gridLayoutController" class="com.keke.superman.datagrid.layout.controller.GridLayoutController"/>
+    <bean class="com.keke.superman.esb.util.ESBContextHolder"/>
    <!-- <bean name="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
         <property name="validationMessageSource" ref="i18nMessageSource"/>
     </bean>-->
 
-    <bean id="validationController" class="com.gfa4j.controller.ValidationController"/>
+    <bean id="validationController" class="com.keke.superman.controller.ValidationController"/>
 
 
 </beans>
