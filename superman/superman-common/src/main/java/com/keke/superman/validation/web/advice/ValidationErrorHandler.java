@@ -25,7 +25,7 @@ public class ValidationErrorHandler
 {
     @Autowired
     @Qualifier("i18nMessageSource")
-    private MessageSource a;
+    private MessageSource i18nMessageSource;
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
@@ -34,11 +34,11 @@ public class ValidationErrorHandler
         HttpServletResponse localHttpServletResponse = RequestAndResponseContextHolder.response();
         BindingResult localBindingResult = ex.getBindingResult();
         List localList = localBindingResult.getFieldErrors();
-        ValidationError localValidationError = a(localList);
+        ValidationError localValidationError = validationError(localList);
         ResponseUtils.renderJson(localHttpServletResponse, JsonMapperHolder.jsonMapper.toJson(localValidationError));
     }
 
-    private ValidationError a(List<FieldError> paramList)
+    private ValidationError validationError(List<FieldError> paramList)
     {
         ValidationError localValidationError = new ValidationError();
         for (FieldError localFieldError : paramList)
